@@ -4,6 +4,7 @@ from src.utils import *
 import urllib.request, urllib.parse, urllib.error
 from lxml.html.clean import Cleaner
 from collections import defaultdict
+import time
 
 
 class BUWrapper(object):
@@ -69,19 +70,17 @@ class BUWrapper(object):
         """
         items = self.construct_items()
         records = self.find_record_candidates()
-        print(len(records))
 
         paths = [self.get_simplified_path(record) for record in records]
-        print(paths)
         records = [record for record in records
                    if count_descendants(record, items) > 1 and
                    paths.count(self.get_simplified_path(record)) >= 3]
-        print(len(records))
 
         return records
 
 if __name__ == '__main__':
-    wrapper = BUWrapper('https://sourceforge.net/projects/issabelpbx/reviews/?sort=created_date&stars=0#reviews-n-ratings')
+    # wrapper = BUWrapper('https://sourceforge.net/projects/issabelpbx/reviews/?sort=created_date&stars=0#reviews-n-ratings')
+    wrapper = BUWrapper('https://www.amazon.com/s/ref=a9_asi_1?rh=i%3Aaps%2Ck%3Ayeezy&keywords=yeezy&ie=UTF8&qid=1503993123')
     items = wrapper.get_data_records()
     for item in items:
         print('<<<<')
