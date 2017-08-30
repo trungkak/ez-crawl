@@ -29,15 +29,21 @@ class BUWrapper(object):
                  if paths.count(self.get_simplified_path(node)) >= 3]
         return items
 
-    def group_items(self, items):
+    def group_by_path(self, node_list):
+        """
+        :param node_list: list of HtmlElement nodes
+        :return: dict with key be simple path of nodes, value be list of node with the same simple path
+        """
         grp = defaultdict(list)
-        for item in items:
-            key = self.get_simplified_path(item)
-            grp[key].append(item)
+        for node in node_list:
+            key = self.get_simplified_path(node)
+            grp[key].append(node)
         return grp
 
-    def group_records(self, records):
-        pass
+    def find_region_candidates(self):
+        records = self.get_data_records()
+        grp = self.group_by_path(records)
+        return grp
 
     def get_data(self):
         display = Display()
@@ -54,7 +60,7 @@ class BUWrapper(object):
 
     def find_record_candidates(self):
         items = self.construct_items()
-        grp_items = self.group_items(items)
+        grp_items = self.group_by_path(items)
         candidates = []
         for path in list(grp_items.keys()):
             for node in grp_items[path]:
@@ -76,12 +82,11 @@ class BUWrapper(object):
         return records
 
 if __name__ == '__main__':
-    # wrapper = BUWrapper('https://sourceforge.net/projects/issabelpbx/reviews/?sort=created_date&stars=0#reviews-n-ratings')
-    wrapper = BUWrapper('https://www.amazon.com/s/ref=a9_asi_1?rh=i%3Aaps%2Ck%3Ayeezy&keywords=yeezy&ie=UTF8&qid=1503993123')
-    items = wrapper.get_data_records()
-    for item in items:
+    wrapper = BUWrapper('https://sourceforge.net/projects/issabelpbx/reviews/?sort=created_date&stars=0#reviews-n-ratings')
+    # wrapper = BUWrapper('https://www.amazon.com/s/ref=a9_asi_1?rh=i%3Aaps%2Ck%3Ayeezy&keywords=yeezy&ie=UTF8&qid=1503993123')
+    grp = wrapper.find_region_candidates()
+    for path in list(grp.keys()):
         print('<<<<')
-        print(etree.tostring(item, pretty_print=True))
+        for item in grp[path]:
+            print(etree.tostring(item, pretty_print=True))
         print('>>>>')
-
-    print(len(items))
