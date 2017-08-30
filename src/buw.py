@@ -1,10 +1,10 @@
 from lxml import etree
 import lxml.html
 from src.utils import *
-import urllib.request, urllib.parse, urllib.error
 from lxml.html.clean import Cleaner
 from collections import defaultdict
-import time
+from selenium import webdriver
+from pyvirtualdisplay import Display
 
 
 class BUWrapper(object):
@@ -36,21 +36,18 @@ class BUWrapper(object):
             grp[key].append(item)
         return grp
 
+    def group_records(self, records):
+        pass
+
     def get_data(self):
-        page = urllib.request.urlopen(self.url)
-        html_body = page.read()
-        cleaner = Cleaner(javascript=True, scripts=True, style=True, kill_tags=['a'])
+        display = Display()
+        display.start()
+        driver = webdriver.Firefox()
+        driver.get(self.url)
+        html_body = driver.page_source
+        cleaner = Cleaner(javascript=True, scripts=True, style=True)
         doc = cleaner.clean_html(html_body)
         return doc
-
-    def record_removal(self):
-        pass
-
-    def region_finder(self):
-        pass
-
-    def region_removal(self):
-        pass
 
     def get_simplified_path(self, node):
         return re.sub(pattern, '', self.tree.getpath(node))
