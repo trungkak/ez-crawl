@@ -51,7 +51,7 @@ class BUWrapper(object):
         driver = webdriver.Firefox()
         driver.get(self.url)
         html_body = driver.page_source
-        cleaner = Cleaner(javascript=True, scripts=True, style=True)
+        cleaner = Cleaner()
         doc = cleaner.clean_html(html_body)
         return doc
 
@@ -82,11 +82,11 @@ class BUWrapper(object):
         return records
 
 if __name__ == '__main__':
-    wrapper = BUWrapper('https://sourceforge.net/projects/issabelpbx/reviews/?sort=created_date&stars=0#reviews-n-ratings')
-    # wrapper = BUWrapper('https://www.amazon.com/s/ref=a9_asi_1?rh=i%3Aaps%2Ck%3Ayeezy&keywords=yeezy&ie=UTF8&qid=1503993123')
+    # wrapper = BUWrapper('https://sourceforge.net/projects/issabelpbx/reviews/?sort=created_date&stars=0#reviews-n-ratings')
+    wrapper = BUWrapper('https://www.amazon.com/s/ref=a9_asi_1?rh=i%3Aaps%2Ck%3Ayeezy&keywords=yeezy&ie=UTF8&qid=1503993123')
     grp = wrapper.find_region_candidates()
     for path in list(grp.keys()):
         print('<<<<')
         for item in grp[path]:
-            print(etree.tostring(item, pretty_print=True))
+            print(etree.tostring(item))
         print('>>>>')
