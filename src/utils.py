@@ -1,6 +1,7 @@
 from lxml.html.clean import Cleaner
 from lxml import etree
 import re
+from math import log
 
 # Constants
 pattern = r'\[[^\]]*\]'
@@ -38,6 +39,24 @@ def check_record_candidate(node, list_node):
 
 def is_grandparent(ancestor_node, node):
     return ancestor_node in list(node.iterancestors())
+
+
+def get_largest_text(node):
+    if len(list(node.itertext())) == 0 or node.itertext() == None:
+        return ""
+    txt_lst = [re.sub(' +',' ',text) for text in list(node.itertext())]
+    return max(txt_lst, key=len)
+
+
+def compute_entropy(lst):
+    if all(elem == 0 for elem in lst):
+        return -1
+    try:
+        s = 1.0*sum(lst)
+        lst = [(elem/s)*log(elem/s) for elem in lst]
+        return -1*sum(lst)
+    except:
+        return -1
 
 if __name__ == '__main__':
     html_str = """
