@@ -6,17 +6,25 @@ from collections import defaultdict
 from selenium import webdriver
 from pyvirtualdisplay import Display
 from collections import Counter
+from pprint import pprint
+from urllib.parse import urlsplit
+import time
 
 class BUWrapper(object):
 
     def __init__(self, url):
         self.url = url
+        self.prefix = self.find_prefix()
 
         self.root = self.construct_tree()
         self.tree = etree.ElementTree(self.root)
 
         self.leaf_nodes = []
         get_all_leaf_nodes(self.root, self.leaf_nodes)
+
+    def find_prefix(self):
+        prefix = "{0.scheme}://{0.netloc}/".format(urlsplit(self.url))
+        return prefix
 
     def construct_tree(self):
         doc = self.get_data()
@@ -50,6 +58,7 @@ class BUWrapper(object):
         # display.start()
         driver = webdriver.Firefox()
         driver.get(self.url)
+        time.sleep(5)
         html_body = driver.page_source
 
         cleaner = Cleaner()
@@ -99,19 +108,15 @@ class BUWrapper(object):
             entropy = compute_entropy(text_lens) # Step 2
             d_entropy[path] = entropy
 
-        main_region_path = d_entropy.most_common(1)[0][0] # Step 3
-        return grp_regions[main_region_path]
+        main_region_paths = d_entropy.most_common(3) # Step 3: Choose 3 richest path
+        final_path = max(main_region_paths, key = lambda item: len(item[0]))[0]
+
+        return grp_regions[final_path]
 
 
 if __name__ == '__main__':
-    wrapper = BUWrapper('https://www.amazon.com/s/?rh=n%3A7141123011%2Cn%3A10445813011%2Cn%3A7147440011%2Cn%3A1040660%2Cn%3A1045024&bbn=10445813011&pf_rd_p=d5e6f04b-1f69-4f23-ae52-0c166e61cfd5&pf_rd_r=K2JX835YX15YYPPS06T6')
-    # wrapper = BUWrapper('https://nha.chotot.com')
-    # grp = wrapper.find_region_candidates()
-    # for path in list(grp.keys()):
-    #     print('<<<<')
-    #     for item in grp[path]:
-    #         print(etree.tostring(item))
-    #     print('>>>>')
+    wrapper = BUWrapper('https://www.youtube.com/watch?v=rcFLFxRHEQ4')
     main_content = wrapper.get_main_content()
     for item in main_content:
         print(etree.tostring(item))
+        print(get_record_link(item, wrapper.prefix))
