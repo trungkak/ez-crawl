@@ -10,6 +10,7 @@ from pprint import pprint
 from urllib.parse import urlsplit
 import time
 
+
 class BUWrapper(object):
 
     def __init__(self, url):
@@ -54,8 +55,8 @@ class BUWrapper(object):
         return grp
 
     def get_data(self):
-        # display = Display()
-        # display.start()
+        display = Display()
+        display.start()
         driver = webdriver.Firefox()
         driver.get(self.url)
         time.sleep(5)
@@ -109,14 +110,15 @@ class BUWrapper(object):
             d_entropy[path] = entropy
 
         main_region_paths = d_entropy.most_common(3) # Step 3: Choose 3 richest path
-        final_path = max(main_region_paths, key = lambda item: len(item[0]))[0]
+        final_path = max(main_region_paths, key=lambda elem: len(elem[0]))[0]
 
         return grp_regions[final_path]
 
 
 if __name__ == '__main__':
-    wrapper = BUWrapper('https://www.youtube.com/watch?v=rcFLFxRHEQ4')
+    wrapper = BUWrapper('https://www.ted.com/talks')
     main_content = wrapper.get_main_content()
     for item in main_content:
-        print(etree.tostring(item))
+        # print(etree.tostring(item))
         print(get_record_link(item, wrapper.prefix))
+    print(len(main_content))
