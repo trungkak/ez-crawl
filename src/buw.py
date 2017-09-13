@@ -93,6 +93,21 @@ class BUWrapper(object):
 
         return records
 
+    def navigate(self):
+        pass
+
+    def go_next(self):
+        symbol_next = ['»']
+        pattern_next = ".*[Nn](ex|x)t.*"
+
+        # Search with class
+        xpath_class = '//*[re:test(@class, %s)]' % pattern_next
+        class_paths = self.tree.xpath(xpath_class,
+                                      namespaces={'re': "http://exslt.org/regular-expressions"})
+
+
+
+
     def get_main_content(self):
         """
         Idea:
