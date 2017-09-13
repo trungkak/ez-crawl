@@ -20,7 +20,7 @@ def get_all_leaf_nodes(node, leaf_nodes=[]):
 def count_descendants(ancestor, list_node):
     """
     :param ancestor:
-    :param list_children:
+    :param list_node:
     :return: How many children of parent node is in list children
     """
     descendants = ancestor.findall('.//')  # find all descendants of a node
@@ -62,26 +62,15 @@ def compute_entropy(lst):
 
 
 def get_record_link(node, prefix):
-    a_tags = node.cssselect('a')
-    if a_tags == None or len(a_tags) == 0:
+    a_tags = Parser.find_elements_by_tag(node, 'a')
+    if a_tags is None or len(a_tags) == 0:
         return '#'
-    # if len(a_tags) == 1: # if there's just one url, returns url
-    #     url = a_tags[0].get('href')
-    #     return prefix + url if not url.startswith(prefix) else url
-    # url_mapper = Counter()
-    # for tag in a_tags:
-    #     url = tag.get('href')
-    #     if not url.startswith(prefix): # Internal url
-    #         return prefix + url
-    #     url_mapper[url] = len(Parser.get_text(tag))
-    #
-    # return url_mapper.most_common(1)[0][0] # Choose url with longest text
     url = a_tags[0].get('href')
     i = 1
     while url == "#" and i < len(a_tags):
         url = a_tags[i].get('href')
         i += 1
-    if url == None or len(url) == 0:
+    if url is None or len(url) == 0:
         return '#'
     return prefix + url if not url.startswith(prefix) else url
 

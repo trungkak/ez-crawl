@@ -23,22 +23,26 @@ class Parser(object):
         return tostring(node)
 
     @classmethod
+    def css_select(cls, node, selector):
+        return node.cssselect(selector)
+
+    @classmethod
     def find_element_by_id(cls, node, id):
-        selector = '//*[@id="%s"]' % id
-        elems = node.xpath(selector)
-        if elems:
-            return elems[0]
+        selector = '*[@id="%s"]' % id
+        elements = cls.css_select(node, selector)
+        if elements:
+            return elements[0]
         return None
 
     @classmethod
     def find_elements_by_tag(cls, node, tag, attr=None):
         if attr:
-            selector = '//%s[@%s="%s"]' % (tag, list(attr.items())[0][0], list(attr.items())[0][1])
+            selector = '%s[@%s="%s"]' % (tag, list(attr.items())[0][0], list(attr.items())[0][1])
         else:
-            selector = '//%s' % tag
-        elems = node.xpath(selector)
-        if elems:
-            return elems
+            selector = '%s' % tag
+        elements = cls.css_select(node, selector)
+        if elements:
+            return elements
         return []
 
     @classmethod
@@ -48,6 +52,15 @@ class Parser(object):
     @classmethod
     def stringify_node(cls, node):
         return node.text
+
+    @classmethod
+    def rejoin_text(cls, text):
+        return ' '.join(text.split())
+
+    @classmethod
+    def rejoin_group_text(cls, text_lst):
+        return [cls.rejoin_text(text) for text in text_lst]
+
 
 if __name__ == '__main__':
     html = """
