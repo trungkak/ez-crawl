@@ -24,7 +24,7 @@ class BUWrapper(object):
         get_all_leaf_nodes(self.root, self.leaf_nodes)
 
     def find_prefix(self):
-        prefix = "{0.scheme}://{0.netloc}/".format(urlsplit(self.url))
+        prefix = "{0.scheme}://{0.netloc}".format(urlsplit(self.url))
         return prefix
 
     def construct_tree(self):
@@ -63,6 +63,7 @@ class BUWrapper(object):
         html_body = driver.page_source
 
         cleaner = Cleaner()
+        cleaner.comments = True
         doc = cleaner.clean_html(html_body)
         return doc
 
@@ -110,18 +111,27 @@ class BUWrapper(object):
             d_entropy[path] = entropy
 
         main_region_paths = d_entropy.most_common(2) # Step 3: Choose 2 richest path
-        final_path = max(main_region_paths, key=lambda elem: len(elem[0]))[0]
 
-        # final_path = d_entropy.most_common(1)[0][0]
+        final_path1 = max(main_region_paths, key=lambda elem: len(elem[0]))[0]
 
-        return grp_regions[final_path]
+        final_path2 = d_entropy.most_common(1)[0][0]
+
+        if len(grp_regions[final_path1]) > len(grp_regions[final_path2]):
+            return grp_regions[final_path1]
+        else:
+            return grp_regions[final_path2]
 
 
 if __name__ == '__main__':
-    url = 'https://xe.chotot.com/'
+    url = 'https://machinelearningcoban.com/'
     wrapper = BUWrapper(url)
     main_content = wrapper.get_main_content()
-    for item in main_content:
-        # print(etree.tostring(item))
-        print(get_record_link(item, wrapper.prefix))
-    print(len(main_content))
+    record_urls = list(set([get_record_link(record, wrapper.prefix) for record in main_content]))
+    for record_url in record_urls:
+        print(record_url)
+    # for item in main_content:
+    #     print('-----')
+    #     print(etree.tostring(item))
+    #     print(get_record_link(item, wrapper.prefix))
+    #     print('-----')
+    print(len(record_urls))
