@@ -109,14 +109,17 @@ class BUWrapper(object):
             entropy = compute_entropy(text_lens) # Step 2
             d_entropy[path] = entropy
 
-        main_region_paths = d_entropy.most_common(3) # Step 3: Choose 3 richest path
+        main_region_paths = d_entropy.most_common(2) # Step 3: Choose 2 richest path
         final_path = max(main_region_paths, key=lambda elem: len(elem[0]))[0]
+
+        # final_path = d_entropy.most_common(1)[0][0]
 
         return grp_regions[final_path]
 
 
 if __name__ == '__main__':
-    wrapper = BUWrapper('https://www.ted.com/talks')
+    url = 'https://xe.chotot.com/'
+    wrapper = BUWrapper(url)
     main_content = wrapper.get_main_content()
     for item in main_content:
         # print(etree.tostring(item))
