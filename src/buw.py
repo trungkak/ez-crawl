@@ -101,12 +101,10 @@ class BUWrapper(object):
         pattern_next = ".*[Nn](ex|x)t.*"
 
         # Search with class
-        xpath_class = '//*[re:test(@class, %s)]' % pattern_next
+        xpath_class = "//*[re:test(@class, '%s')]" % pattern_next
         class_paths = self.tree.xpath(xpath_class,
                                       namespaces={'re': "http://exslt.org/regular-expressions"})
-
-
-
+        return class_paths[-1]
 
     def get_main_content(self):
         """
@@ -138,7 +136,7 @@ class BUWrapper(object):
 
 
 if __name__ == '__main__':
-    url = 'https://machinelearningcoban.com/'
+    url = 'https://www.amazon.com/s/ref=a9_asi_1?rh=i%3Aaps%2Ck%3Ayeezy&keywords=yeezy&ie=UTF8&qid=1503993123'
     wrapper = BUWrapper(url)
     main_content = wrapper.get_main_content()
     record_urls = list(set([get_record_link(record, wrapper.prefix) for record in main_content]))
@@ -150,3 +148,4 @@ if __name__ == '__main__':
     #     print(get_record_link(item, wrapper.prefix))
     #     print('-----')
     print(len(record_urls))
+    print(etree.tostring(wrapper.go_next()))
