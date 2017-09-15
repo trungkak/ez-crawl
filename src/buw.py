@@ -35,7 +35,7 @@ class BUWrapper(object):
     def construct_items(self):
         paths = [self.get_simplified_path(node) for node in self.leaf_nodes]
         items = [node for node in self.leaf_nodes
-                 if paths.count(self.get_simplified_path(node)) >= 3]
+                 if paths.count(self.get_simplified_path(node)) >= 5]
         return items
 
     def group_by_path(self, node_list):
@@ -49,15 +49,22 @@ class BUWrapper(object):
             grp[key].append(node)
         return grp
 
+    def group_by_parent_node(self, node_list):
+        grp = defaultdict(list)
+        for node in node_list:
+            key = find_direct_parent(node)
+            grp[key].append(node)
+        return grp
+
     def find_region_candidates(self):
         records = self.get_data_records()
-        grp = self.group_by_path(records)
+        grp = self.group_by_parent_node(records)
         return grp
 
     def get_data(self):
         display = Display()
         display.start()
-        driver = webdriver.Firefox()
+        driver = webdriver.Chrome()
         driver.get(self.url)
         time.sleep(5)
         html_body = driver.page_source
@@ -93,9 +100,6 @@ class BUWrapper(object):
 
         return records
 
-    def navigate(self):
-        pass
-
     def go_next(self):
         symbol_next = ['»']
         pattern_next = ".*[Nn](ex|x)t.*"
@@ -114,38 +118,43 @@ class BUWrapper(object):
         3. Main content is the block with maximum entropy
         """
         grp_regions = self.find_region_candidates()
+        for region in list(grp_regions.keys()):
+            print('---------')
+            print(etree.tostring(region))
+            print(is_static(region))
+            print('---------')
+        grp_regions = {region:grp_regions[region] for region in grp_regions if not is_static(region)}
+
         d_entropy = Counter()
         for path in list(grp_regions.keys()):
             region = grp_regions[path]
             text_lens = []
             for record in region:
-                text_lens.append(len(get_largest_text(record))) # Step 1
-            entropy = compute_entropy(text_lens) # Step 2
+                text_lens.append(len(get_largest_text(record)))  # Step 1
+            entropy = compute_entropy(text_lens)  # Step 2
             d_entropy[path] = entropy
 
-        main_region_paths = d_entropy.most_common(2) # Step 3: Choose 2 richest path
+        main_region_paths = d_entropy.most_common(2)    # Step 3: Choose 3 richest path
 
         final_path1 = max(main_region_paths, key=lambda elem: len(elem[0]))[0]
 
-        final_path2 = d_entropy.most_common(1)[0][0]
+        # final_path2 = d_entropy.most_common(1)[0][0]
 
-        if len(grp_regions[final_path1]) > len(grp_regions[final_path2]):
-            return grp_regions[final_path1]
-        else:
-            return grp_regions[final_path2]
+        # if len(grp_regions[final_path1]) > len(grp_regions[final_path2]):
+        #     return grp_regions[final_path1]
+        # else:
+        #     return grp_regions[final_path2]
+        return final_path1
 
 
 if __name__ == '__main__':
-    url = 'https://www.amazon.com/s/ref=a9_asi_1?rh=i%3Aaps%2Ck%3Ayeezy&keywords=yeezy&ie=UTF8&qid=1503993123'
+    url = 'https://stackoverflow.com/questions/'
     wrapper = BUWrapper(url)
     main_content = wrapper.get_main_content()
-    record_urls = list(set([get_record_link(record, wrapper.prefix) for record in main_content]))
-    for record_url in record_urls:
-        print(record_url)
     # for item in main_content:
-    #     print('-----')
     #     print(etree.tostring(item))
-    #     print(get_record_link(item, wrapper.prefix))
-    #     print('-----')
-    print(len(record_urls))
+    # record_urls = list(set([get_record_link(record, wrapper.prefix) for record in main_content]))
+    # for record_url in record_urls:
+    #     print(record_url)
+    # print(len(record_urls))
     print(etree.tostring(wrapper.go_next()))

@@ -31,6 +31,10 @@ def find_all_ancestors(node):
     return node.iterancestors()
 
 
+def find_direct_parent(node):
+    return node.getparent()
+
+
 def check_record_candidate(node, list_node):
     candidates = []
     for ancestor in find_all_ancestors(node):
@@ -61,6 +65,15 @@ def compute_entropy(lst):
         return -1
 
 
+def get_region_size(node):
+    return len(etree.tostring(node))
+
+
+def get_max_dict(dct):
+    max_tup = max(dct, key=lambda item: get_region_size(item))
+    return max_tup
+
+
 def get_record_link(node, prefix):
     a_tags = Parser.find_elements_by_tag(node, 'a')
     if a_tags is None or len(a_tags) == 0:
@@ -73,6 +86,33 @@ def get_record_link(node, prefix):
     if url is None or len(url) == 0:
         return '#'
     return prefix + url if not url.startswith(prefix) else url
+
+
+def is_static(node):
+    """
+    Ignore elements containing static component properties
+    such as: "nav", "histogram", ..
+    """
+    patterns_static = [".*[Nn]av.*", ".*[Hh]istogram.*"]
+    node_class = node.get('class')
+    if node_class:
+        for pattern in patterns_static:
+            if re.match(pattern, node_class):
+                return True
+    # children = node.getchildren() or []
+    # for child in children:
+    #     child_class = child.get('class')
+    #     if not child_class:
+    #         continue
+    #     for pattern in patterns_static:
+    #         if re.match(pattern, child_class):
+    #             return True
+    return False
+
+def has_id(node):
+    """
+    Data region usually has id
+    """
 
 if __name__ == '__main__':
     html_str = """
@@ -96,21 +136,8 @@ if __name__ == '__main__':
         </body>
     </html>"""
 
-    record_html = """
-    <ul>
-    <li itemscope="" itemtype="http://schema.org/Product" class="_10fX327FTBhXxwannc1Gp_">
-    <a itemprop="url" class="_2-QpDA4ooHCnxpPjIDiUYD" href="/quan-binh-tan/mua-ban-nha-dat/nha-ngay-tt-tan-tao-a-38434359.htm">
-    <div class="yfFxjKOyB3Fo2OkEau-wW">
-    <img itemprop="image" alt="Nhà   ngay TT Tân Tạo A." class="_2QyIW9LqRbk7pxfkpTpSI6 lazyloaded" src="https://static.chotot.com.vn/mob_thumbs_app/17/1733888557.jpg">
-    </div>
-    <div class="_15oCrCDHNpc124ULZtp53I">
-    <h3 itemprop="name" class="Gw4t5HfxzKaRjRHV9AVas">
-    <!-- react-text: 224 --><!-- /react-text --><!-- react-text: 225 -->Nhà   ngay TT Tân Tạo A.<!-- /react-text --></h3>
-    <div class="_1h1BByQ1mTum4oTxnd2Mb7" itemprop="offers" itemscope="" itemtype="http://schema.org/Offer"><span itemprop="price" content="1280000000" class="rbUN6Vaz5gMZ1qei6Mbrq"><!-- react-text: 228 -->1.280.000.000 đ<!-- /react-text --><!-- react-text: 229 --><!-- /react-text --></span></div></div><!-- react-text: 230 --><!-- /react-text --></a><div class="_3wMagatP7dhqM755AzyuqO"><span class="XXGpZ-FP2JDUEL80ZK7ZE"><!-- react-text: 233 -->hôm nay 10:22<!-- /react-text --><span class="hidden-xxs"><!-- react-text: 235 --> <!-- /react-text --><!-- react-text: 236 -->| Quận Bình Tân<!-- /react-text --></span></span><span class="_3F7ZRFISLZKL0eTzUD5aNP pull-right"><span title="Quốc Huy"><img class="_2Iqho-pdncc-NrQBTAGBLf pull-right img-circle " src="https://static.chotot.com.vn/imaginary/78ad5a8ba849961e00c00e823b84934a2759a252/profile_avatar/60d1f1e370ecd54982edf78b4a4d3150813d31d6/thumbnail?width=32" alt="private"><span class="_1MOBvRCbVZ58X7LdLV3Mi R6EON5H9wxUv5eo_Wv0Ep pull-right">Quốc Huy</span><div class="clear"></div></span></span></div></li>
-    </ul>
-    """
-    # root = etree.fromstring(html_str)
-    # tree = etree.ElementTree(root)
+    root = etree.fromstring(html_str)
+    tree = etree.ElementTree(root)
     #
     # leaf_nodes = []
     # get_all_leaf_nodes(root, leaf_nodes)
