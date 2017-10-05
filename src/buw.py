@@ -118,12 +118,12 @@ class BUWrapper(object):
         3. Main content is the block with maximum entropy
         """
         grp_regions = self.find_region_candidates()
-        for region in list(grp_regions.keys()):
-            print('---------')
-            print(etree.tostring(region))
-            print(is_static(region))
-            print('---------')
         grp_regions = {region:grp_regions[region] for region in grp_regions if not is_static(region)}
+
+        # for region in list(grp_regions.keys()):
+        #     print('---------')
+        #     print(etree.tostring(region))
+        #     print('---------')
 
         d_entropy = Counter()
         for path in list(grp_regions.keys()):
@@ -134,27 +134,23 @@ class BUWrapper(object):
             entropy = compute_entropy(text_lens)  # Step 2
             d_entropy[path] = entropy
 
-        main_region_paths = d_entropy.most_common(2)    # Step 3: Choose 3 richest path
+        main_region_paths = d_entropy.most_common(2)    # Step 3: Choose 2 richest path
 
         final_path1 = max(main_region_paths, key=lambda elem: len(elem[0]))[0]
 
-        # final_path2 = d_entropy.most_common(1)[0][0]
+        final_path2 = d_entropy.most_common(1)[0][0]
 
-        # if len(grp_regions[final_path1]) > len(grp_regions[final_path2]):
-        #     return grp_regions[final_path1]
-        # else:
-        #     return grp_regions[final_path2]
-        return final_path1
+        if len(grp_regions[final_path1]) > len(grp_regions[final_path2]):
+            return grp_regions[final_path1]
+        else:
+            return grp_regions[final_path2]
 
 
 if __name__ == '__main__':
-    url = 'https://stackoverflow.com/questions/'
+    url = 'https://www.amazon.com/Doormat-Entrance-Bathroom-Kitchen-Bedroom/dp/B071JH9F6P/ref=pd_day0_201_3?_encoding=UTF8&pd_rd_i=B071JH9F6P&pd_rd_r=28MJTKNQ999PMKXA9WG8&pd_rd_w=WjErD&pd_rd_wg=tKSDd&psc=1&refRID=28MJTKNQ999PMKXA9WG8&dpID=61T3oTnYaZL&preST=_SY300_QL70_&dpSrc=detail'
     wrapper = BUWrapper(url)
     main_content = wrapper.get_main_content()
-    # for item in main_content:
-    #     print(etree.tostring(item))
-    # record_urls = list(set([get_record_link(record, wrapper.prefix) for record in main_content]))
-    # for record_url in record_urls:
-    #     print(record_url)
-    # print(len(record_urls))
-    print(etree.tostring(wrapper.go_next()))
+    record_urls = list(set([get_record_link(record, wrapper.prefix) for record in main_content]))
+    for record_url in record_urls:
+        print(record_url)
+    print(len(record_urls))
