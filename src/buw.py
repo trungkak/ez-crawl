@@ -3,12 +3,12 @@ import lxml.html
 from src.utils import *
 from lxml.html.clean import Cleaner
 from collections import defaultdict
-from selenium import webdriver
-from pyvirtualdisplay import Display
 from collections import Counter
-from pprint import pprint
 from urllib.parse import urlsplit
 import time
+from fake_useragent import UserAgent
+import random
+import requests
 
 
 class BUWrapper(object):
@@ -62,17 +62,25 @@ class BUWrapper(object):
         return grp
 
     def get_data(self):
-        display = Display()
-        display.start()
-        driver = webdriver.Chrome()
-        driver.get(self.url)
-        time.sleep(5)
-        html_body = driver.page_source
+
+        html_body = self._by_pass_get_html(self.url)
 
         cleaner = Cleaner()
         cleaner.comments = True
         doc = cleaner.clean_html(html_body)
         return doc
+
+    def _by_pass_get_html(self, url):
+        """ In case you are blocked """
+
+        ua = UserAgent()
+        header = {'User-Agent': str(ua.chrome)}
+        print(header)
+
+        time.sleep(0.5 * random.random())
+        r = requests.get(url, headers=header)
+        page_html = r.content
+        return page_html
 
     def get_simplified_path(self, node):
         return re.sub(pattern, '', self.tree.getpath(node))
@@ -147,10 +155,10 @@ class BUWrapper(object):
 
 
 if __name__ == '__main__':
-    url = 'https://www.amazon.com/Doormat-Entrance-Bathroom-Kitchen-Bedroom/dp/B071JH9F6P/ref=pd_day0_201_3?_encoding=UTF8&pd_rd_i=B071JH9F6P&pd_rd_r=28MJTKNQ999PMKXA9WG8&pd_rd_w=WjErD&pd_rd_wg=tKSDd&psc=1&refRID=28MJTKNQ999PMKXA9WG8&dpID=61T3oTnYaZL&preST=_SY300_QL70_&dpSrc=detail'
+    url = 'https://tiki.vn/day-sac-day-cap/c1823?src=mega-menu'
     wrapper = BUWrapper(url)
     main_content = wrapper.get_main_content()
-    record_urls = list(set([get_record_link(record, wrapper.prefix) for record in main_content]))
-    for record_url in record_urls:
-        print(record_url)
-    print(len(record_urls))
+    # record_urls = list(set([Parser.get_text(record) for record in main_content]))
+    for record in main_content:
+        print(list(record.itertext()))
+    print(len(main_content))

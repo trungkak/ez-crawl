@@ -49,6 +49,7 @@ class Parser(object):
     def get_text(cls, node):
         return node.text_content()
 
+
     @classmethod
     def stringify_node(cls, node):
         return node.text
