@@ -1,3 +1,5 @@
+# IMPORTANT NOTE: this version is no longer maintained, new version can be found here: https://github.com/trungkak/ezcrawl 
+
 # Auto deep listing web crawler
 This is a web content extracting module written in Python, it's heavily based on python lxml. It works best on Deep websites (websites that result information based on what you entered) like Amazon, StackOverflow, Ebay,.. 
 
